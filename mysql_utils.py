@@ -24,7 +24,7 @@ def insert(config, table_name, df, debug=False):
 
     if len(data) == 0:  # Create table if it doesn't already exist
         attributes = df.columns
-        joined_str = ' VARCHAR(255), '.join(attributes) + ' VARCHAR(255)'
+        joined_str = ' VARCHAR(500), '.join(attributes) + ' VARCHAR(500)'
         sql = 'CREATE TABLE ' + table_name + '(ID int NOT NULL AUTO_INCREMENT, ' + joined_str + ', PRIMARY KEY (ID) )'
         if 'id' in attributes or 'Id' in attributes or 'iD' in attributes or 'ID' in attributes:
             sql = 'CREATE TABLE ' + table_name + '(RowID int NOT NULL AUTO_INCREMENT, ' + joined_str + ', PRIMARY KEY (RowID) )'
@@ -55,10 +55,11 @@ def insert(config, table_name, df, debug=False):
         newColumns.append(col)
     df.columns = newColumns             # Replace '.' with '_' in all column names
     df.fillna(value='', inplace=True)   # Replace NaN values with '' as MySQL is not compatible with NaN
+    df = df.astype(str)
 
     for col in df.columns:
         if col not in table_cols:
-            sql = f""" ALTER TABLE {table_name} ADD COLUMN {col} VARCHAR(20000)"""  # VARCHAR(MAX) is not compatible with MySQL. Max is 65535.
+            sql = f""" ALTER TABLE {table_name} ADD COLUMN {col} VARCHAR(500)"""  # VARCHAR(MAX) is not compatible with MySQL. Max is 65535.
             print(sql)
             cursor.execute(sql)
             connection.commit()
